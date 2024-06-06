@@ -1,0 +1,25 @@
+package login
+
+import (
+	"staffinc/internal/view/layout"
+	"staffinc/internal/view/components"
+)
+
+templ Login() {
+	@layout.Base() {
+		@components.Card("mx-auto my-auto") {
+			<h2>Login</h2>
+			<form action="/login" method="POST">
+				<div>
+					<label for="email">Email:</label>
+					<input class="border-solid border-2" id="email" name="email" type="text"/>
+				</div>
+				<div>
+					<label for="password">Password:</label>
+					<input class="border-solid border-2" id="password" name="password" type="password"/>
+				</div>
+				<button class="bg-sky-500 mx-auto w-full text-white rounded-xl mt-10" type="submit">Submit</button>
+			</form>
+		}
+	}
+}

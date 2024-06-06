@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -10,12 +11,13 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 
 	"staffinc/internal/service"
+	"staffinc/middleware"
 )
 
 type Server struct {
 	port int
 
-	db service.Service
+	service service.Service
 }
 
 func NewServer() *http.Server {
@@ -23,13 +25,17 @@ func NewServer() *http.Server {
 	NewServer := &Server{
 		port: port,
 
-		db: service.New(),
+		service: service.New(),
 	}
+
+	slogHandler := slog.NewTextHandler(os.Stdout, nil)
+	logger := slog.New(slogHandler)
+	slog.SetDefault(logger)
 
 	// Declare Server config
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(),
+		Handler:      middleware.LoggerMiddleware(NewServer.RegisterRoutes()),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,

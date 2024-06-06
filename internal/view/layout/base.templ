@@ -1,0 +1,17 @@
+package layout
+
+templ Base() {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8"/>
+			<title>Staffinc</title>
+			<script src="https://cdn.tailwindcss.com"></script>
+		</head>
+		<body>
+			<main class="mx-auto sm:max-w[540px] md:max-w-[720px] lg:max-w-[960px] xl:max-w-[1440px] h-screen flex">
+				{ children... }
+			</main>
+		</body>
+	</html>
+}

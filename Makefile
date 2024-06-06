@@ -1,16 +1,20 @@
+
 # Simple Makefile for a Go project
 
 # Build the application
 all: build
 
-build:
+generate:
+	@echo "Generating templates..."
+	@templ generate
+
+build: generate
 	@echo "Building..."
-	
-	@go build -o main cmd/api/main.go
+	@go build -o main cmd/monolith/main.go
 
 # Run the application
 run:
-	@go run cmd/api/main.go
+	@go run cmd/monolith/main.go
 
 # Create DB container
 docker-run:
@@ -57,4 +61,4 @@ watch:
 	    fi; \
 	fi
 
-.PHONY: all build run test clean
+.PHONY: all build generate run test clean

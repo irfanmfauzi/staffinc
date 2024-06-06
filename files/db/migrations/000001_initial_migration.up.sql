@@ -11,8 +11,9 @@ CREATE TABLE IF NOT EXISTS generator_links (
 	user_id BIGINT,
 	code VARCHAR(255) NOT NULL,
 	expired_at timestamp NOT NULL,
+	count_access int not null default 0,
 
-	FOREIGN KEY (user_ud) REFERENCES users(id) ON DELETE CASCADE
+	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_code ON generator_links(code);

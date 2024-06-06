@@ -6,15 +6,21 @@ import (
 	"log/slog"
 	"net/http"
 	"staffinc/internal/model/response"
-	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 func VerifyToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		tokenString := r.Header.Get("Authorization")
+		cookie, err := r.Cookie("staffinc_session")
+		if err != nil {
+			resp, _ := json.Marshal(response.GenericResponse{Success: false, Message: "Unauthorized"})
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write(resp)
+			return
+		}
+
+		tokenString := cookie.Value
 
 		if tokenString == "" {
 			resp, _ := json.Marshal(response.GenericResponse{Success: false, Message: "Unauthorized"})
@@ -22,8 +28,6 @@ func VerifyToken(next http.Handler) http.Handler {
 			w.Write(resp)
 			return
 		}
-
-		tokenString = strings.Split(tokenString, " ")[1]
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return []byte("REPLACE_THIS_WITH_ENV_VAR_SECRET"), nil

@@ -1,0 +1,9 @@
+package components
+
+import "fmt"
+
+templ Card(className string) {
+	<div class={ fmt.Sprintf("bg-white rounded-lg overflow-hidden shadow-md h-[200px] w-[200px] %v", className) }>
+		{ children... }
+	</div>
+}
