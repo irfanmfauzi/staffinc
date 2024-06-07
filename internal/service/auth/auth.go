@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -93,7 +94,7 @@ func (a *authService) Register(ctx context.Context, req request.RegisterRequest,
 	defer tx.Rollback()
 
 	if code != "" {
-		generatorLink, err := a.generatorLinkRepo.GetGeneratorLinkByCode(ctx, tx, code)
+		generatorLink, err := a.generatorLinkRepo.LockGetGeneratorLinkByCode(ctx, tx, code)
 		if err != nil {
 			slog.Info("Failed to Get Generator Link By Code", "Error", err)
 			httpCode := http.StatusInternalServerError
@@ -115,7 +116,7 @@ func (a *authService) Register(ctx context.Context, req request.RegisterRequest,
 	}
 
 	if req.Role == "generator" {
-		err = a.generatorLinkRepo.InsertGeneratorLink(ctx, tx, userId)
+		err = a.generatorLinkRepo.InsertGeneratorLink(ctx, tx, userId, uuid.New().String(), time.Now().Add(24*time.Hour).UTC())
 		if err != nil {
 			slog.Error("Failed to Insert Generator Link", "Error", err)
 			return http.StatusInternalServerError, err

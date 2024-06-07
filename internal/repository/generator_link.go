@@ -5,7 +5,6 @@ import (
 	"staffinc/internal/model/entity"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -19,11 +18,10 @@ func NewGeneratorLink(db *sqlx.DB) generatorLink {
 	}
 }
 
-func (g *generatorLink) InsertGeneratorLink(ctx context.Context, tx TxProvider, userId int64) error {
-	code := uuid.New()
+func (g *generatorLink) InsertGeneratorLink(ctx context.Context, tx TxProvider, userId int64, code string, expiredAt time.Time) error {
 	query := "INSERT INTO generator_links (user_id,code,expired_at) VALUES ($1,$2,$3)"
 
-	_, err := g.DB(tx).ExecContext(ctx, query, userId, code, time.Now().Add(time.Hour*24))
+	_, err := g.DB(tx).ExecContext(ctx, query, userId, code, expiredAt)
 	if err != nil {
 		return err
 	}
@@ -31,7 +29,7 @@ func (g *generatorLink) InsertGeneratorLink(ctx context.Context, tx TxProvider, 
 	return nil
 }
 
-func (g *generatorLink) GetGeneratorLinkByCode(ctx context.Context, tx TxProvider, code string) (entity.GeneratorLink, error) {
+func (g *generatorLink) LockGetGeneratorLinkByCode(ctx context.Context, tx TxProvider, code string) (entity.GeneratorLink, error) {
 	query := "SELECT * FROM generator_links WHERE code = $1 FOR UPDATE"
 
 	result := entity.GeneratorLink{}

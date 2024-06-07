@@ -37,7 +37,10 @@ docker-down:
 # Test the application
 test:
 	@echo "Testing..."
-	@go test ./tests -v
+	@go test -v -cover -coverprofile=coverage.out ./...
+	@go tool cover -html=coverage.out
+	@go tool cover -func coverage.out
+	@echo "Finish testing"
 
 # Clean the binary
 clean:

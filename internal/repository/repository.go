@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"staffinc/internal/model/entity"
+	"time"
 )
 
 type UserRepoProvider interface {
@@ -12,8 +13,8 @@ type UserRepoProvider interface {
 }
 
 type GeneratorLinkProvider interface {
-	InsertGeneratorLink(ctx context.Context, tx TxProvider, userId int64) error
-	GetGeneratorLinkByCode(ctx context.Context, tx TxProvider, code string) (entity.GeneratorLink, error)
+	InsertGeneratorLink(ctx context.Context, tx TxProvider, userId int64, code string, expiredAt time.Time) error
+	LockGetGeneratorLinkByCode(ctx context.Context, tx TxProvider, code string) (entity.GeneratorLink, error)
 	IncrementCount(ctx context.Context, tx TxProvider, code string) error
 }
 
