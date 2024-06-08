@@ -2,10 +2,9 @@ package generatorlinkService
 
 import (
 	"context"
-	"errors"
 	"log/slog"
-	"net/http"
 	"staffinc/internal/model/entity"
+	errorX "staffinc/internal/model/error"
 	"staffinc/internal/repository"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 )
 
 type GeneratorLinkServiceProvider interface {
-	GenerateLink(ctx context.Context) (code int, err error)
+	GenerateLink(ctx context.Context) errorX.Error
 	GetLink(ctx context.Context) (generatorLink []entity.GeneratorLink, err error)
 }
 
@@ -35,29 +34,29 @@ func NewGenerateLinkService(cfg GeneratorLinkServiceConfig) generatorLinkService
 	}
 }
 
-func (g *generatorLinkService) GenerateLink(ctx context.Context) (code int, err error) {
+func (g *generatorLinkService) GenerateLink(ctx context.Context) errorX.Error {
 	user := ctx.Value("user").(map[string]interface{})
 	userId := int64(user["id"].(float64))
 	role := user["role"].(string)
 
 	if role != "generator" {
-		return http.StatusForbidden, errors.New("only user with role generator that can generate link")
+		return errorX.New(errorX.ERROR_CODE_FORBIDDEN_GENERATE_LINK)
 	}
 
 	tx, err := g.db.BeginTxx(ctx, nil)
 	if err != nil {
 		slog.Error("failed to begin transaction", "Error", err)
-		return http.StatusInternalServerError, err
+		return errorX.New(errorX.ERROR_CODE_INTERNAL_SERVER)
 	}
 	defer tx.Rollback()
 
 	err = g.generatorLinkRepo.InsertGeneratorLink(ctx, tx, userId, uuid.New().String(), time.Now().Add(time.Hour*24*7).UTC())
 	if err != nil {
 		slog.Error("failed to insert generator link", "Error", err)
-		return http.StatusInternalServerError, err
+		return errorX.New(errorX.ERROR_CODE_INTERNAL_SERVER)
 	}
 	tx.Commit()
-	return http.StatusOK, nil
+	return errorX.Error{}
 }
 
 func (g *generatorLinkService) GetLink(ctx context.Context) (generatorLink []entity.GeneratorLink, err error) {

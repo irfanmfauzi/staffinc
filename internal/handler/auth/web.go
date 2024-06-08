@@ -29,14 +29,14 @@ func (a *authHandler) PostRegisterWebHandler(w http.ResponseWriter, r *http.Requ
 	password := r.FormValue("password")
 	code := r.FormValue("code")
 
-	httpCode, err := a.authService.Register(r.Context(), request.RegisterRequest{Email: email, Password: password, Role: "contributor"}, code)
-	if err != nil {
-		w.WriteHeader(httpCode)
-		w.Write([]byte(err.Error()))
+	errX := a.authService.Register(r.Context(), request.RegisterRequest{Email: email, Password: password, Role: "contributor"}, code)
+	if errX.IsNotEmpty() {
+		w.WriteHeader(errX.GetHttpCode())
+		w.Write([]byte(errX.GetErrorCodeMessage().Error()))
 		return
 	}
 
-	w.WriteHeader(httpCode)
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("ok"))
 }
 
@@ -58,11 +58,11 @@ func (a *authHandler) LoginWebHandler(w http.ResponseWriter, r *http.Request) {
 	req.Email = r.FormValue("email")
 	req.Password = r.FormValue("password")
 
-	tokenString, code, err := a.authService.Login(r.Context(), req)
-	if err != nil {
+	tokenString, errX := a.authService.Login(r.Context(), req)
+	if errX.IsNotEmpty() {
 		w.Header().Set("Content-type", "application-json")
-		resp, _ := json.Marshal(response.GenericResponse{Success: false, Message: err.Error()})
-		w.WriteHeader(code)
+		resp, _ := json.Marshal(response.GenericResponse{Success: false, Message: errX.GetErrorCodeMessage().Error()})
+		w.WriteHeader(errX.GetHttpCode())
 		w.Write(resp)
 		return
 	}

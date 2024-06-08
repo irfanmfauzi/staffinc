@@ -42,11 +42,11 @@ func (a *authHandler) RegisterApiHandler(w http.ResponseWriter, r *http.Request)
 
 	ctx := r.Context()
 	code := r.PathValue("code")
-	httpCode, err := a.authService.Register(ctx, req, code)
-	if err != nil {
-		resp, _ := json.Marshal(response.GenericResponse{Success: false, Message: err.Error()})
+	errX := a.authService.Register(ctx, req, code)
+	if errX.IsNotEmpty() {
+		resp, _ := json.Marshal(response.GenericResponse{Success: false, Message: errX.GetErrorCodeMessage().Error()})
+		w.WriteHeader(errX.GetHttpCode())
 		w.Write(resp)
-		w.WriteHeader(httpCode)
 		return
 	}
 
@@ -90,10 +90,11 @@ func (a *authHandler) LoginApiHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx := r.Context()
 
-	tokenString, code, err := a.authService.Login(ctx, req)
-	if err != nil {
-		resp, _ := json.Marshal(response.GenericResponse{Success: false, Message: err.Error()})
-		w.WriteHeader(code)
+	tokenString, errX := a.authService.Login(ctx, req)
+	if errX.IsNotEmpty() {
+		slog.Error("Error Login", "Error", errX)
+		resp, _ := json.Marshal(response.GenericResponse{Success: false, Message: errX.GetErrorCodeMessage().Error()})
+		w.WriteHeader(errX.GetHttpCode())
 		w.Write(resp)
 		return
 	}

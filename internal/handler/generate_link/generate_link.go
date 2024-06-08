@@ -35,16 +35,16 @@ func RegisterGenerateLink(mux *http.ServeMux, service generatorlinkService.Gener
 func (h *generateLinkHandler) PostGenerateLinkHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application-json")
 
-	code, err := h.generateLinkService.GenerateLink(r.Context())
-	if err != nil {
-		resp, _ := json.Marshal(response.GenericResponse{Success: false, Message: err.Error()})
+	errX := h.generateLinkService.GenerateLink(r.Context())
+	if errX.IsNotEmpty() {
+		resp, _ := json.Marshal(response.GenericResponse{Success: false, Message: errX.GetErrorCodeMessage().Error()})
+		w.WriteHeader(errX.GetHttpCode())
 		w.Write(resp)
-		w.WriteHeader(code)
 		return
 	}
 
 	resp, _ := json.Marshal(response.GenericResponse{Success: true, Message: "Success generate link"})
-	w.WriteHeader(code)
+	w.WriteHeader(http.StatusCreated)
 	w.Write(resp)
 	return
 }
