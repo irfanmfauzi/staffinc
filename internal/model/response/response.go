@@ -1,7 +1,7 @@
 package response
 
 type GenericResponse struct {
-	Success bool   `json:"status"`
+	Success bool   `json:"success"`
 	Message string `json:"message"`
 }
 

@@ -16,6 +16,10 @@ build: generate
 run:
 	@go run cmd/monolith/main.go
 
+
+swagger-doc:
+	@swag init -g cmd/monolith/main.go 
+
 # Create DB container
 docker-run:
 	@if docker compose up 2>/dev/null; then \

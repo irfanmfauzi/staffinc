@@ -29,6 +29,20 @@ func (g *generatorLink) InsertGeneratorLink(ctx context.Context, tx TxProvider, 
 	return nil
 }
 
+func (g *generatorLink) GetGeneratorLinkByUserId(ctx context.Context, userId int64) ([]entity.GeneratorLink, error) {
+	query := "SELECT * FROM generator_links WHERE user_id = $1"
+	result := []entity.GeneratorLink{}
+
+	err := g.db.SelectContext(ctx, &result, query, userId)
+
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+
+}
+
 func (g *generatorLink) LockGetGeneratorLinkByCode(ctx context.Context, tx TxProvider, code string) (entity.GeneratorLink, error) {
 	query := "SELECT * FROM generator_links WHERE code = $1 FOR UPDATE"
 

@@ -9,6 +9,18 @@ import (
 	"staffinc/internal/model/response"
 )
 
+// RegisterApiHandler is handler to create an event
+// RegisterApiHandler godoc
+// @Summary     RegisterApiHandler
+// @Accept      json
+// @Description Register, PIC : Irfan Fauzi
+// @Produce     json
+// @Tags        Auth
+// @Param       RegisterRequest body     request.RegisterRequest true "RegisterRequest"
+// @Success     201             {object} response.GenericResponse{}
+// @Failure     500             {object} response.GenericResponse{}
+// @ID          v1-RegisterApiHandler
+// @Router      /auth/register   [post]
 func (a *authHandler) RegisterApiHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application-json")
 
@@ -43,6 +55,18 @@ func (a *authHandler) RegisterApiHandler(w http.ResponseWriter, r *http.Request)
 	w.Write(resp)
 }
 
+// LoginApiHandler is handler to create an event
+// LoginApiHandler godoc
+// @Summary     LoginApiHandler
+// @Accept      json
+// @Description Register, PIC : Irfan Fauzi
+// @Produce     json
+// @Tags        Auth
+// @Param       RegisterRequest body     request.LoginRequest true "LoginRequest"
+// @Success     201             {object} response.LoginResponse{}
+// @Failure     500             {object} response.GenericResponse{}
+// @ID          v1-LoginApiHandler
+// @Router      /auth/login   [post]
 func (a *authHandler) LoginApiHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-type", "application-json")
@@ -93,5 +117,4 @@ func (a *authHandler) LoginApiHandler(w http.ResponseWriter, r *http.Request) {
 	)
 
 	w.Write(resp)
-
 }

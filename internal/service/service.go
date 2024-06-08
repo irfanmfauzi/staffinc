@@ -6,6 +6,7 @@ import (
 	"os"
 	"staffinc/internal/repository"
 	authService "staffinc/internal/service/auth"
+	generatorlinkService "staffinc/internal/service/generator_link"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
@@ -13,7 +14,8 @@ import (
 )
 
 type Service struct {
-	UserService authService.AuthServiceProvider
+	UserService         authService.AuthServiceProvider
+	GenerateLinkService generatorlinkService.GeneratorLinkServiceProvider
 }
 
 var (
@@ -41,7 +43,13 @@ func New() Service {
 		Db:                db,
 	})
 
+	generateLinkService := generatorlinkService.NewGenerateLinkService(generatorlinkService.GeneratorLinkServiceConfig{
+		Db:                db,
+		GeneratorLinkRepo: &generatorLinkRepo,
+	})
+
 	return Service{
-		UserService: &userService,
+		UserService:         &userService,
+		GenerateLinkService: &generateLinkService,
 	}
 }

@@ -16,6 +16,7 @@ type GeneratorLinkProvider interface {
 	InsertGeneratorLink(ctx context.Context, tx TxProvider, userId int64, code string, expiredAt time.Time) error
 	LockGetGeneratorLinkByCode(ctx context.Context, tx TxProvider, code string) (entity.GeneratorLink, error)
 	IncrementCount(ctx context.Context, tx TxProvider, code string) error
+	GetGeneratorLinkByUserId(ctx context.Context, userId int64) ([]entity.GeneratorLink, error)
 }
 
 type TxProvider interface {
