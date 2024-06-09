@@ -1,0 +1,27 @@
+package admin
+
+templ Base() {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8"/>
+			<title>Staffinc</title>
+			<script src="https://cdn.tailwindcss.com"></script>
+		</head>
+		<body>
+			<div class="flex h-screen">
+				<aside class="border-4">
+					SHOULD BE NAVBAR
+				</aside>
+				<div class="flex flex-col">
+					<header>
+						SHOULD BE HEADER
+					</header>
+					<main>
+						{ children... }
+					</main>
+				</div>
+			</div>
+		</body>
+	</html>
+}

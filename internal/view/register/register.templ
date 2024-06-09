@@ -1,0 +1,26 @@
+package register
+
+import (
+	"staffinc/internal/view/layout"
+	"staffinc/internal/view/components"
+)
+
+templ Register(code string) {
+	@layout.Base() {
+		@components.Card("mx-auto my-auto") {
+			<h2>Register</h2>
+			<form action="/register" method="POST">
+				<div>
+					<label for="email">Email:</label>
+					<input class="border-solid border-2" id="email" name="email" type="text"/>
+				</div>
+				<div>
+					<label for="password">Password:</label>
+					<input class="border-solid border-2" id="password" name="password" type="password"/>
+				</div>
+				<input type="hidden" value={ code } name="code"/>
+				<button class="bg-sky-500 mx-auto w-full text-white rounded-xl mt-10" type="submit">Submit</button>
+			</form>
+		}
+	}
+}

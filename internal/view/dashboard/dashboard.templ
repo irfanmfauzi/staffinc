@@ -1,0 +1,27 @@
+package dashboard
+
+import "staffinc/internal/view/layout/admin"
+import "staffinc/internal/model/entity"
+import "time"
+import "fmt"
+
+templ Dashboard(items []entity.GeneratorLink) {
+	@admin.Base() {
+		<div>
+			<table class="border-collapse w-full border-2 border-solid">
+				<tr>
+					<th>Link</th>
+					<th>Is Expired</th>
+					<th>Count Access</th>
+				</tr>
+				for _, item := range items {
+					<tr class="even:bg-[#dddddd]">
+						<td>{ fmt.Sprintf("%v/%v","http://localhost:8080/api/register",item.Code) }</td>
+						<td>{ fmt.Sprint(item.ExpiredAt.After(time.Now())) }</td>
+						<td>{ fmt.Sprint(item.CountAccess) }</td>
+					</tr>
+				}
+			</table>
+		</div>
+	}
+}

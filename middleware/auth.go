@@ -1,0 +1,57 @@
+package middleware
+
+import (
+	"context"
+	"encoding/json"
+	"log/slog"
+	"net/http"
+	"staffinc/internal/model/response"
+
+	"github.com/golang-jwt/jwt/v5"
+)
+
+func VerifyToken(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("staffinc_session")
+		if err != nil {
+			resp, _ := json.Marshal(response.GenericResponse{Success: false, Message: "Unauthorized"})
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write(resp)
+			return
+		}
+
+		tokenString := cookie.Value
+
+		if tokenString == "" {
+			resp, _ := json.Marshal(response.GenericResponse{Success: false, Message: "Unauthorized"})
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write(resp)
+			return
+		}
+
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			return []byte("REPLACE_THIS_WITH_ENV_VAR_SECRET"), nil
+		})
+		if err != nil {
+			slog.Error("ERROR", "error", err)
+			resp, _ := json.Marshal(response.GenericResponse{Success: false, Message: "Invalid Token"})
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(resp)
+			return
+		}
+
+		if !token.Valid {
+			resp, _ := json.Marshal(response.GenericResponse{Success: false, Message: "Unauthorized"})
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write(resp)
+			return
+		} else {
+			claim := token.Claims.(jwt.MapClaims)
+			user := claim["user"].(map[string]interface{})
+			ctx := context.WithValue(r.Context(), "user", user)
+
+			next.ServeHTTP(w, r.WithContext(ctx))
+		}
+
+	})
+}
