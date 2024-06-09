@@ -35,7 +35,12 @@ func RegisterGenerateLink(mux *http.ServeMux, service generatorlinkService.Gener
 func (h *generateLinkHandler) PostGenerateLinkHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application-json")
 
-	errX := h.generateLinkService.GenerateLink(r.Context())
+	ctx := r.Context()
+	user := ctx.Value("user").(map[string]interface{})
+	userId := int64(user["id"].(float64))
+	role := user["role"].(string)
+
+	errX := h.generateLinkService.GenerateLink(ctx, userId, role)
 	if errX.IsNotEmpty() {
 		resp, _ := json.Marshal(response.GenericResponse{Success: false, Message: errX.GetErrorCodeMessage().Error()})
 		w.WriteHeader(errX.GetHttpCode())

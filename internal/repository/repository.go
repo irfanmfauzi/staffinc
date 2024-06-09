@@ -19,6 +19,10 @@ type GeneratorLinkProvider interface {
 	GetGeneratorLinkByUserId(ctx context.Context, userId int64) ([]entity.GeneratorLink, error)
 }
 
+type TransactionProvider interface {
+	NewTransaction(ctx context.Context, opts *sql.TxOptions) (TxProvider, error)
+}
+
 type TxProvider interface {
 	Commit() error
 	Rollback() error

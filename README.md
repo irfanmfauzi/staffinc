@@ -9,6 +9,9 @@ Run migration script and do watch script to hot reload when development
 make watch
 ```
 
+## Component
+For Creating new component or pages read guide on [Templ](https://templ.guide)
+
 ## API Docs
 
 For API docs, we are using [Swagger](https://swagger.io/) with [Swag](https://github.com/swaggo/swag) Generator

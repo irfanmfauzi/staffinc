@@ -9,41 +9,36 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 )
 
 type GeneratorLinkServiceProvider interface {
-	GenerateLink(ctx context.Context) errorX.Error
-	GetLink(ctx context.Context) (generatorLink []entity.GeneratorLink, err error)
+	GenerateLink(ctx context.Context, userId int64, role string) errorX.Error
+	GetLink(ctx context.Context, userId int64) (generatorLink []entity.GeneratorLink, err error)
 }
 
 type GeneratorLinkServiceConfig struct {
-	Db                *sqlx.DB
-	GeneratorLinkRepo repository.GeneratorLinkProvider
+	TransactionProvider repository.TransactionProvider
+	GeneratorLinkRepo   repository.GeneratorLinkProvider
 }
 
 type generatorLinkService struct {
-	db                *sqlx.DB
-	generatorLinkRepo repository.GeneratorLinkProvider
+	transactionProvider repository.TransactionProvider
+	generatorLinkRepo   repository.GeneratorLinkProvider
 }
 
 func NewGenerateLinkService(cfg GeneratorLinkServiceConfig) generatorLinkService {
 	return generatorLinkService{
-		db:                cfg.Db,
-		generatorLinkRepo: cfg.GeneratorLinkRepo,
+		transactionProvider: cfg.TransactionProvider,
+		generatorLinkRepo:   cfg.GeneratorLinkRepo,
 	}
 }
 
-func (g *generatorLinkService) GenerateLink(ctx context.Context) errorX.Error {
-	user := ctx.Value("user").(map[string]interface{})
-	userId := int64(user["id"].(float64))
-	role := user["role"].(string)
-
+func (g *generatorLinkService) GenerateLink(ctx context.Context, userId int64, role string) errorX.Error {
 	if role != "generator" {
 		return errorX.New(errorX.ERROR_CODE_FORBIDDEN_GENERATE_LINK)
 	}
 
-	tx, err := g.db.BeginTxx(ctx, nil)
+	tx, err := g.transactionProvider.NewTransaction(ctx, nil)
 	if err != nil {
 		slog.Error("failed to begin transaction", "Error", err)
 		return errorX.New(errorX.ERROR_CODE_INTERNAL_SERVER)
@@ -59,15 +54,11 @@ func (g *generatorLinkService) GenerateLink(ctx context.Context) errorX.Error {
 	return errorX.Error{}
 }
 
-func (g *generatorLinkService) GetLink(ctx context.Context) (generatorLink []entity.GeneratorLink, err error) {
-	user := ctx.Value("user").(map[string]interface{})
-	userId := int64(user["id"].(float64))
-
+func (g *generatorLinkService) GetLink(ctx context.Context, userId int64) (generatorLink []entity.GeneratorLink, err error) {
 	generatorLink, err = g.generatorLinkRepo.GetGeneratorLinkByUserId(ctx, userId)
 	if err != nil {
 		return generatorLink, err
 	}
 
 	return generatorLink, nil
-
 }

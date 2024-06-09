@@ -19,7 +19,11 @@ func RegisterWebHandlerRoute(mux *http.ServeMux, service generatorlinkService.Ge
 }
 
 func (h *webHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
-	items, err := h.generatorlinkService.GetLink(r.Context())
+	ctx := r.Context()
+	user := ctx.Value("user").(map[string]interface{})
+	userId := int64(user["id"].(float64))
+
+	items, err := h.generatorlinkService.GetLink(r.Context(), userId)
 	if err != nil {
 		return
 	}

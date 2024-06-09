@@ -19,12 +19,11 @@ type Service struct {
 }
 
 var (
-	database        = os.Getenv("DB_DATABASE")
-	password        = os.Getenv("DB_PASSWORD")
-	username        = os.Getenv("DB_USERNAME")
-	port            = os.Getenv("DB_PORT")
-	host            = os.Getenv("DB_HOST")
-	serviceInstance Service
+	database = os.Getenv("DB_DATABASE")
+	password = os.Getenv("DB_PASSWORD")
+	username = os.Getenv("DB_USERNAME")
+	port     = os.Getenv("DB_PORT")
+	host     = os.Getenv("DB_HOST")
 )
 
 func New() Service {
@@ -37,15 +36,18 @@ func New() Service {
 
 	userRepo := repository.NewUserRepo(db)
 	generatorLinkRepo := repository.NewGeneratorLink(db)
+
+	dbTransaction := repository.NewDBTransaction(db)
+
 	userService := authService.NewAuthService(authService.AuthServiceConfig{
-		UserRepo:          &userRepo,
-		GeneratorLinkRepo: &generatorLinkRepo,
-		Db:                db,
+		UserRepo:            &userRepo,
+		GeneratorLinkRepo:   &generatorLinkRepo,
+		TransactionProvider: dbTransaction,
 	})
 
 	generateLinkService := generatorlinkService.NewGenerateLinkService(generatorlinkService.GeneratorLinkServiceConfig{
-		Db:                db,
-		GeneratorLinkRepo: &generatorLinkRepo,
+		TransactionProvider: dbTransaction,
+		GeneratorLinkRepo:   &generatorLinkRepo,
 	})
 
 	return Service{

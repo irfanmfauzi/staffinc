@@ -14,7 +14,6 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
 )
 
 type AuthServiceProvider interface {
@@ -24,22 +23,22 @@ type AuthServiceProvider interface {
 }
 
 type AuthServiceConfig struct {
-	Db                *sqlx.DB
-	UserRepo          repository.UserRepoProvider
-	GeneratorLinkRepo repository.GeneratorLinkProvider
+	TransactionProvider repository.TransactionProvider
+	UserRepo            repository.UserRepoProvider
+	GeneratorLinkRepo   repository.GeneratorLinkProvider
 }
 
 type authService struct {
-	db                *sqlx.DB
-	userRepo          repository.UserRepoProvider
-	generatorLinkRepo repository.GeneratorLinkProvider
+	transactionProvider repository.TransactionProvider
+	userRepo            repository.UserRepoProvider
+	generatorLinkRepo   repository.GeneratorLinkProvider
 }
 
 func NewAuthService(cfg AuthServiceConfig) authService {
 	return authService{
-		db:                cfg.Db,
-		userRepo:          cfg.UserRepo,
-		generatorLinkRepo: cfg.GeneratorLinkRepo,
+		transactionProvider: cfg.TransactionProvider,
+		userRepo:            cfg.UserRepo,
+		generatorLinkRepo:   cfg.GeneratorLinkRepo,
 	}
 }
 
@@ -83,14 +82,14 @@ func (a *authService) Login(ctx context.Context, request request.LoginRequest) (
 }
 
 func (a *authService) Register(ctx context.Context, req request.RegisterRequest, code string) errorX.Error {
-	tx, err := a.db.BeginTxx(ctx, nil)
+	tx, err := a.transactionProvider.NewTransaction(ctx, nil)
 	if err != nil {
 		slog.Error("Failed to Begin Transaction", "Error", err)
 		return errorX.New(errorX.ERROR_CODE_INTERNAL_SERVER)
 	}
 	defer tx.Rollback()
 
-	if code != "" {
+	if code != "" && req.Role != "generator" {
 		generatorLink, err := a.generatorLinkRepo.LockGetGeneratorLinkByCode(ctx, tx, code)
 		if err != nil {
 			slog.Info("Failed to Get Generator Link By Code", "Error", err)
@@ -113,7 +112,7 @@ func (a *authService) Register(ctx context.Context, req request.RegisterRequest,
 	}
 
 	if req.Role == "generator" {
-		err = a.generatorLinkRepo.InsertGeneratorLink(ctx, tx, userId, uuid.New().String(), time.Now().Add(24*time.Hour).UTC())
+		err = a.generatorLinkRepo.InsertGeneratorLink(ctx, tx, userId, uuid.New().String(), time.Now().Add(24*time.Hour*7).UTC())
 		if err != nil {
 			slog.Error("Failed to Insert Generator Link", "Error", err)
 			return errorX.New(errorX.ERROR_CODE_INTERNAL_SERVER)

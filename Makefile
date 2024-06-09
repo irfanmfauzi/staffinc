@@ -4,13 +4,14 @@
 # Build the application
 all: build
 
-generate:
+templ-generate:
 	@echo "Generating templates..."
 	@templ generate
 
-build: generate
+build: templ-generate
 	@echo "Building..."
 	@go build -o main cmd/monolith/main.go
+	@echo "Finish Build"
 
 # Run the application
 run:
@@ -67,5 +68,9 @@ watch:
 	        exit 1; \
 	    fi; \
 	fi
+
+mock:
+	mockery --dir ./internals/repository --all --output ./internals/repository/mocks
+
 
 .PHONY: all build generate run test clean
