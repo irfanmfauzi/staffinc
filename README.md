@@ -9,6 +9,15 @@ Run migration script and do watch script to hot reload when development
 make watch
 ```
 
+## How to generate mock automatically?
+
+For mocking purposes, you can use [Mockery](https://github.com/vektra/mockery) to generate mock class(es) for your
+interfaces.
+
+```sh
+make mock
+```
+
 ## Component
 For Creating new component or pages read guide on [Templ](https://templ.guide)
 
